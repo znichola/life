@@ -1,0 +1,11 @@
+{
+	"files.associations": {
+		"*.excalidraw": "json",
+		"*.excalidrawlib": "json",
+		"life.h": "c",
+		"__bit_reference": "c",
+		"__string": "c",
+		"cstring": "c",
+		"unistd.h": "c"
+	}
+}
