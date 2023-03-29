@@ -6,7 +6,7 @@
 /*   By: znichola <znichola@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 23:36:54 by znichola          #+#    #+#             */
-/*   Updated: 2023/03/29 00:59:01 by znichola         ###   ########.fr       */
+/*   Updated: 2023/03/29 02:11:32 by znichola         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <stdlib.h>
 # include <math.h>
 # include <string.h>
-
+# include <ctype.h>
 
 # define WIDTH 10
 # define HEIGHT 10
