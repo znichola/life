@@ -6,47 +6,88 @@
 /*   By: znichola <znichola@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 23:19:31 by znichola          #+#    #+#             */
-/*   Updated: 2023/03/29 02:40:33 by znichola         ###   ########.fr       */
+/*   Updated: 2023/03/29 13:08:47 by znichola         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "life.h"
 
-static void	get_neighbours(char world[WIDTH][HEIGHT], char *neighbours, int x, int y);
-static void	print_world(char world[WIDTH][HEIGHT]);
-static int	count_neighbours(char world[WIDTH][HEIGHT], int x, int y);
-static void	set_world(char world[WIDTH][HEIGHT], char *input);
+static void	get_neighbours(char *world, char *neighbours, int x, int y);
+static void	print_world(char *world);
+static int	count_neighbours(char *world, int x, int y);
+static void	set_world(char *world, char *input);
 static int	get_square(char *input);
 static void	remove_newlines(char *input);
+static void	itter_cells(char *world);
 
 int	main(int ac, char **av)
 {
-	char	world[WIDTH][HEIGHT] = {0};
+	char	world[WIDTH * HEIGHT] = {0};
 
-	memset(&world, '.', sizeof(world));
+	memset(&world, E, sizeof(world));
 
 	if (ac != 1)
 		return (1);
 	(void)av;
 	printf("hello live world\n");
 
-	(void)count_neighbours;
-	(void)print_world;
-	(void)get_square;
+	// char str[] = "\
+	// ...\
+	// ###\
+	// ...\
+	// ";
 
-	char str[] = "\
-	.#.\
-	.#.\
-	.#.\
-	";
+	char	str[WIDTH * HEIGHT];
+	int len	= WIDTH * HEIGHT - 10;
+	srand(567);
+	for (int i = 0; i < len; i++)
+		str[i] = rand() %2 ? L : E;
 
 	set_world(world, str);
-	print_world(world);
-	// printf("\033[%dF", HEIGHT);
+
+	while (1)
+	{
+		print_world(world);
+		itter_cells(world);
+		// printf("~~\n");
+		printf("\033[%dF", HEIGHT);
+		usleep(100000);
+	}
+	// printf("c:%d\n",count_neighbours(world, 0, 0));
 	return (1);
 }
 
-static void	get_neighbours(char world[WIDTH][HEIGHT], char *neighbours, int x, int y)
+static void	itter_cells(char *world)
+{
+	char new_world[WIDTH * HEIGHT] = {0};
+	memset(&new_world, E, sizeof(new_world));
+
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			int	n = count_neighbours(world, x, y);
+			if (world[x + y * WIDTH] == L && (n == 2 || n == 3))
+				new_world[x + y * WIDTH] = L;
+			else if (world[x + y * WIDTH] == E && n == 3)
+				new_world[x + y * WIDTH] = L;
+		}
+	}
+
+	// int x = 4;
+	// int y = 4;
+	// printf("old world (%d, %d) %d %c\n", x, y, count_neighbours(world, x, y), world[x + y * WIDTH]);
+	// printf("new world (%d, %d) %d %c\n", x, y, count_neighbours(new_world, x, y), new_world[x + y * WIDTH]);
+
+	// printf("~\n");
+	// y = 3;
+	// printf("old world (%d, %d) %d %c\n", x, y, count_neighbours(world, x, y), world[x + y * WIDTH]);
+	// printf("new world (%d, %d) %d %c\n", x, y, count_neighbours(new_world, x, y), new_world[x + y * WIDTH]);
+
+	memmove(world, new_world, sizeof(new_world));
+}
+
+static void	get_neighbours(char *world, char *neighbours, int x, int y)
 {
 	neighbours[0] = get_nw(world, x, y);
 	neighbours[1] =  get_n(world, x, y);
@@ -58,17 +99,17 @@ static void	get_neighbours(char world[WIDTH][HEIGHT], char *neighbours, int x, i
 	neighbours[7] = get_se(world, x, y);
 }
 
-static void	print_world(char world[WIDTH][HEIGHT])
+static void	print_world(char *world)
 {
 	for (int y = 0; y < HEIGHT; y++)
 	{
 		for (int x = 0; x < WIDTH; x++)
-			printf("%c", world[x][y]);
+			printf("%c", world[x + y * WIDTH]);
 		printf("\n");
 	}
 }
 
-static int	count_neighbours(char world[WIDTH][HEIGHT], int x, int y)
+static int	count_neighbours(char *world, int x, int y)
 {
 	char nei[8] = {0};
 	int	count = 0;
@@ -80,7 +121,7 @@ static int	count_neighbours(char world[WIDTH][HEIGHT], int x, int y)
 	return (count);
 }
 
-static void	set_world(char world[WIDTH][HEIGHT], char *input)
+static void	set_world(char *world, char *input)
 {
 	remove_newlines(input);
 
@@ -91,7 +132,7 @@ static void	set_world(char world[WIDTH][HEIGHT], char *input)
 
 	for (int y = 0; y < d; y++)
 		for (int x = 0; x < d; x++)
-			world[sx + x][sy + y] = input[x + d * y];
+			world[sx + x + (sy + y) * WIDTH] = input[x + d * y];
 }
 
 
@@ -103,14 +144,18 @@ static int	get_square(char *input)
 {
 	int	l = strlen(input);
 
+	int i = 2;
 	// printf("l:%d\n", (int)l);
-	for (int i = 2; i < l; i ++)
+	for (; i < l; i ++)
 		if (i * i == l)
 			return (i);
+		else if (i * i > l)
+			break;
 
-	printf("not a square starting seed\n");
-	exit(0);
-	return (0);
+	printf("not a square starting seed l:%d i:%d\n", l, i);
+	return (i - 1);
+	// exit(0);
+	// return (0);
 }
 
 static void	remove_newlines(char *input)
