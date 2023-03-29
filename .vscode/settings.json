@@ -6,6 +6,9 @@
 		"__bit_reference": "c",
 		"__string": "c",
 		"cstring": "c",
-		"unistd.h": "c"
+		"unistd.h": "c",
+		"string": "c",
+		"string_view": "c",
+		"ctype.h": "c"
 	}
 }
