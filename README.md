@@ -1,6 +1,6 @@
 # Conway's Game of Life
 
-[The Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) is an infinatly interesting littel simulation and and nice programming exercise.
+[The Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) is an infinatly interesting little simulation, and a nice programming exercise.
 
 ## C
 
