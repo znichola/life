@@ -4,8 +4,8 @@
 
 ## C
 
-The first implementation was in c, check it out on the `c` branch.
+The first implementation was in c.
 
 ## Zig
 
-My attempt at doing it in zig, lets see how it do.
+My attempt at doing it in zig, let's see how it do.
