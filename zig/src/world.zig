@@ -2,9 +2,10 @@ const std = @import("std");
 const expect = std.testing.expect;
 
 pub const World = struct {
-    map: []const u8,
+    map: []u8,
     height: usize,
     width: usize,
+    allocator: std.mem.Allocator,
 
     pub fn print(self: World, out: anytype) void {
         out.print("h: {}\nw: {}\n", .{ self.height, self.width }) catch {};
@@ -13,14 +14,20 @@ pub const World = struct {
         }
     }
 
-    pub fn clone(self: World, allocator: std.mem.Allocator) !World {
-        const new_map = try allocator.alloc(u8, self.map.len);
+    pub fn clone(self: World) !World {
+        const new_map = try self.allocator.alloc(u8, self.map.len);
         std.mem.copyForwards(u8, new_map, self.map);
         return World{
             .map = new_map,
             .height = self.height,
             .width = self.width,
+            .allocator = self.allocator,
         };
+    }
+
+    pub fn init(map: []const u8, height: usize, width: usize, allocator: std.mem.Allocator) !World {
+        const m = try allocator.dupe(u8, map);
+        return (World){ .map = m, .width = width, .height = height, .allocator = allocator };
     }
 
     pub fn get_at(self: World, x: usize, y: usize) !u8 {
@@ -67,7 +74,9 @@ pub const World = struct {
 };
 
 test "Checking cardinal getters" {
-    var test_world = World{ .map = "123456789", .height = 3, .width = 3 };
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var test_world = try World.init("123456789", 3, 3, gpa.allocator());
+    //var test_world = World{ .map = "123456789"[0..9], .height = 3, .width = 3 };
 
     try expect(test_world.get_at(1, 1) catch unreachable == '5');
     try expect(test_world.get_n(1, 1) catch unreachable == '2');
@@ -82,10 +91,11 @@ test "Checking cardinal getters" {
 }
 
 test "Test World Clone World" {
-    const test_world = World{ .map = "123456789", .height = 3, .width = 3 };
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var test_world = try World.init("123456789", 3, 3, gpa.allocator());
+    // const test_world = World{ .map = "123456789", .height = 3, .width = 3 };
     // const foo = gpa.allocator();
-    const clone_world = try test_world.clone(gpa.allocator());
+    const clone_world = try test_world.clone();
     try expect(std.mem.eql(u8, test_world.map, clone_world.map));
     try expect(test_world.width == clone_world.width);
     try expect(test_world.height == clone_world.height);
