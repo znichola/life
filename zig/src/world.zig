@@ -7,6 +7,8 @@ pub const World = struct {
     width: usize,
     allocator: std.mem.Allocator,
 
+   const DirectionError = error{OutOfBounds, EmptyWorld};
+
     pub fn print(self: World, out: anytype) void {
         out.print("h: {}\nw: {}\n", .{ self.height, self.width }) catch {};
         for (0..self.height) |i| {
@@ -30,7 +32,35 @@ pub const World = struct {
         return (World){ .map = m, .width = width, .height = height, .allocator = allocator };
     }
 
-    pub fn get_at(self: World, x: usize, y: usize) !u8 {
+    pub fn count_neighbours(self: World, char: u8, x: usize, y: usize) usize {
+        var count: usize = 0;
+        
+        const DirectionFn = fn (self: World, x: usize, y: usize) !u8(DirectionError);
+        const directions: [_]DirectionFn = .{
+            World.get_n,
+            World.get_e,
+            World.get_s,
+            World.get_w,
+            World.get_ne,
+            World.get_se,
+            World.get_sw,
+            World.get_nw,
+        };
+
+        for (directions) |get_direction| {
+            if (get_direction(self, x, y)) |neighbour| {
+                if (neighbour == char) {
+                    count += 1;
+                }
+            } else |err| {
+                if (err != error.OutOfBounds) @panic("Unexpected error");
+            }
+        }
+
+        return count;
+    }
+
+    pub fn get_at(self: World, x: usize, y: usize) !u8(DirectionError) {
         if (self.map.len == 0) {
             return error.EmptyWorld;
         }
@@ -40,35 +70,35 @@ pub const World = struct {
         return self.map[y * self.width + x];
     }
 
-    pub fn get_n(self: World, x: usize, y: usize) !u8 {
+    pub fn get_n(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x, y - 1);
     }
 
-    pub fn get_e(self: World, x: usize, y: usize) !u8 {
+    pub fn get_e(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x + 1, y);
     }
 
-    pub fn get_s(self: World, x: usize, y: usize) !u8 {
+    pub fn get_s(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x, y + 1);
     }
 
-    pub fn get_w(self: World, x: usize, y: usize) !u8 {
+    pub fn get_w(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x - 1, y);
     }
 
-    pub fn get_ne(self: World, x: usize, y: usize) !u8 {
+    pub fn get_ne(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x + 1, y - 1);
     }
 
-    pub fn get_se(self: World, x: usize, y: usize) !u8 {
+    pub fn get_se(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x + 1, y + 1);
     }
 
-    pub fn get_sw(self: World, x: usize, y: usize) !u8 {
+    pub fn get_sw(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x - 1, y + 1);
     }
 
-    pub fn get_nw(self: World, x: usize, y: usize) !u8 {
+    pub fn get_nw(self: World, x: usize, y: usize) !u8(DirectionError) {
         return self.get_at(x - 1, y - 1);
     }
 };

@@ -6,11 +6,15 @@ pub fn main() !void {
     var bw = std.io.bufferedWriter(stdout_file);
     const stdout = bw.writer();
 
-    try stdout.print("All your {s} are belong to us.\n", .{"codebase"});
+    //    try stdout.print("All your {s} are belong to us.\n", .{"codebase"});
 
-    var test_world = World{ .map = "....#....", .height = 3, .width = 3 };
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
 
+    var test_world = try World.init("....#....", 3, 3, allocator);
     test_world.print(stdout);
+
+    allocator.free(test_world.map);
     try bw.flush();
 }
 
