@@ -7,7 +7,7 @@ pub const World = struct {
     width: usize,
     allocator: std.mem.Allocator,
 
-   const DirectionError = error{OutOfBounds, EmptyWorld};
+    const DirectionError = error{ OutOfBounds, EmptyWorld };
 
     pub fn print(self: World, out: anytype) void {
         out.print("h: {}\nw: {}\n", .{ self.height, self.width }) catch {};
@@ -34,21 +34,21 @@ pub const World = struct {
 
     pub fn count_neighbours(self: World, char: u8, x: usize, y: usize) usize {
         var count: usize = 0;
-        
-        const DirectionFn = fn (self: World, x: usize, y: usize) !u8(DirectionError);
-        const directions: [_]DirectionFn = .{
-            World.get_n,
-            World.get_e,
-            World.get_s,
-            World.get_w,
-            World.get_ne,
-            World.get_se,
-            World.get_sw,
-            World.get_nw,
+
+        //const DirectionFn = fn (self: World, x: usize, y: usize) !u8(DirectionError);
+        const directions = [_][2]i32{
+            .{ 0, -1 }, // North
+            .{ 1, 0 }, // East
+            .{ 0, 1 }, // South
+            .{ -1, 0 }, // West
+            .{ 1, -1 }, // NorthEast
+            .{ 1, 1 }, // SouthEast
+            .{ -1, 1 }, // SouthWest
+            .{ -1, -1 }, // NothWest
         };
 
-        for (directions) |get_direction| {
-            if (get_direction(self, x, y)) |neighbour| {
+        for (directions) |dir| {
+            if (self.get_at(x + dir[0], y + dir[1])) |neighbour| {
                 if (neighbour == char) {
                     count += 1;
                 }
