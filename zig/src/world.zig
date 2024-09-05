@@ -32,8 +32,8 @@ pub const World = struct {
         return (World){ .map = m, .width = width, .height = height, .allocator = allocator };
     }
 
-    pub fn count_neighbours(self: World, char: u8, x: usize, y: usize) usize {
-        var count: usize = 0;
+    pub fn count_neighbours(self: World, char: u8, x: i32, y: i32) i32 {
+        var count: i32 = 0;
 
         //const DirectionFn = fn (self: World, x: usize, y: usize) !u8(DirectionError);
         const directions = [_][2]i32{
@@ -48,7 +48,10 @@ pub const World = struct {
         };
 
         for (directions) |dir| {
-            if (self.get_at(x + dir[0], y + dir[1])) |neighbour| {
+            const nx = x + dir[0];
+            const ny = y + dir[1];
+            if (self.get_at(nx, ny)) |neighbour| {
+                std.debug.print("char is: <{c}>\n", .{neighbour});
                 if (neighbour == char) {
                     count += 1;
                 }
@@ -60,47 +63,49 @@ pub const World = struct {
         return count;
     }
 
-    pub fn get_at(self: World, x: usize, y: usize) !u8(DirectionError) {
+    pub fn get_at(self: World, x: i32, y: i32) !u8 {
         if (self.map.len == 0) {
             return error.EmptyWorld;
         }
         if (x < 0 or y < 0 or x > self.width or y > self.height) {
             return error.OutOfBounds;
         }
-        return self.map[y * self.width + x];
+        const uw: i32 = @intCast(self.width);
+        const pos: usize = @intCast(y * uw + x);
+        return self.map[pos];
     }
 
-    pub fn get_n(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x, y - 1);
-    }
-
-    pub fn get_e(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x + 1, y);
-    }
-
-    pub fn get_s(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x, y + 1);
-    }
-
-    pub fn get_w(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x - 1, y);
-    }
-
-    pub fn get_ne(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x + 1, y - 1);
-    }
-
-    pub fn get_se(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x + 1, y + 1);
-    }
-
-    pub fn get_sw(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x - 1, y + 1);
-    }
-
-    pub fn get_nw(self: World, x: usize, y: usize) !u8(DirectionError) {
-        return self.get_at(x - 1, y - 1);
-    }
+    //    pub fn get_n(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x, y - 1);
+    //    }
+    //
+    //    pub fn get_e(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x + 1, y);
+    //    }
+    //
+    //    pub fn get_s(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x, y + 1);
+    //    }
+    //
+    //    pub fn get_w(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x - 1, y);
+    //    }
+    //
+    //    pub fn get_ne(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x + 1, y - 1);
+    //    }
+    //
+    //    pub fn get_se(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x + 1, y + 1);
+    //    }
+    //
+    //    pub fn get_sw(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x - 1, y + 1);
+    //    }
+    //
+    //    pub fn get_nw(self: World, x: usize, y: usize) !u8(DirectionError) {
+    //        return self.get_at(x - 1, y - 1);
+    //    }
 };
 
 test "Checking cardinal getters" {
@@ -109,15 +114,15 @@ test "Checking cardinal getters" {
     //var test_world = World{ .map = "123456789"[0..9], .height = 3, .width = 3 };
 
     try expect(test_world.get_at(1, 1) catch unreachable == '5');
-    try expect(test_world.get_n(1, 1) catch unreachable == '2');
-    try expect(test_world.get_e(1, 1) catch unreachable == '6');
-    try expect(test_world.get_s(1, 1) catch unreachable == '8');
-    try expect(test_world.get_w(1, 1) catch unreachable == '4');
-
-    try expect(test_world.get_ne(1, 1) catch unreachable == '3');
-    try expect(test_world.get_se(1, 1) catch unreachable == '9');
-    try expect(test_world.get_sw(1, 1) catch unreachable == '7');
-    try expect(test_world.get_nw(1, 1) catch unreachable == '1');
+    //    try expect(test_world.get_n(1, 1) catch unreachable == '2');
+    //    try expect(test_world.get_e(1, 1) catch unreachable == '6');
+    //    try expect(test_world.get_s(1, 1) catch unreachable == '8');
+    //    try expect(test_world.get_w(1, 1) catch unreachable == '4');
+    //
+    //    try expect(test_world.get_ne(1, 1) catch unreachable == '3');
+    //    try expect(test_world.get_se(1, 1) catch unreachable == '9');
+    //    try expect(test_world.get_sw(1, 1) catch unreachable == '7');
+    //    try expect(test_world.get_nw(1, 1) catch unreachable == '1');
 }
 
 test "Test World Clone World" {

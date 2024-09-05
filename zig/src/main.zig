@@ -14,6 +14,8 @@ pub fn main() !void {
     var test_world = try World.init("....#....", 3, 3, allocator);
     test_world.print(stdout);
 
+    std.debug.print("got result as <{}>\n", .{test_world.count_neighbours('.', 0, 0)});
+
     allocator.free(test_world.map);
     try bw.flush();
 }
