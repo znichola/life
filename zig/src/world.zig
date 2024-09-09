@@ -40,7 +40,7 @@ pub const World = struct {
         return (World){ .map = m, .alt_map = alt_map, .width = width, .height = height, .allocator = allocator };
     }
 
-    pub fn evolve_map(self: World, steps: usize) void {
+    pub fn evolve_map(self: *World, steps: usize) void {
         _ = steps;
         for (0..self.height) |y| {
             const iy: i32 = @intCast(y);
@@ -60,7 +60,7 @@ pub const World = struct {
         //self.map.ptr = tmp;
         tmp = self.map.ptr;
 
-        //std.mem.swap([]u8, &(self.map), &(self.alt_map));
+        std.mem.swap([]u8, &self.map, &self.alt_map);
         return;
     }
 
