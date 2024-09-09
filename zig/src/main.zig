@@ -16,8 +16,10 @@ pub fn main() !void {
 
     try stdout.print("\ngot result as <{}>\n\n", .{world.count_neighbours(0, 0)});
 
-    world.evolve_map(1);
-    world.print(stdout);
+    for (0..10) |_| {
+        world.evolve_map(1);
+        world.print(stdout);
+    }
 
     allocator.free(world.map);
     allocator.free(world.alt_map);
