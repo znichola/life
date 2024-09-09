@@ -4,6 +4,7 @@ const expectError = std.testing.expectError;
 
 pub const World = struct {
     map: []u8,
+    alt_map: []u8,
     height: usize,
     width: usize,
     live: u8 = '#',
@@ -21,9 +22,12 @@ pub const World = struct {
 
     pub fn clone(self: World) !World {
         const new_map = try self.allocator.alloc(u8, self.map.len);
+        const new_alt_map = try self.allocator.alloc(u8, self.alt_map.len);
         std.mem.copyForwards(u8, new_map, self.map);
+        std.mem.copyForwards(u8, new_alt_map, self.alt_map);
         return World{
             .map = new_map,
+            .alt_map = new_alt_map,
             .height = self.height,
             .width = self.width,
             .allocator = self.allocator,
@@ -32,19 +36,32 @@ pub const World = struct {
 
     pub fn init(map: []const u8, height: usize, width: usize, allocator: std.mem.Allocator) !World {
         const m = try allocator.dupe(u8, map);
-        return (World){ .map = m, .width = width, .height = height, .allocator = allocator };
+        const alt_map = try allocator.dupe(u8, map);
+        return (World){ .map = m, .alt_map = alt_map, .width = width, .height = height, .allocator = allocator };
     }
 
-    pub fn evolve_map(self: World) World {
-        var res = self.clone() catch |err| {
-            std.debug.print("Error cloning world, {}\n", .{err});
-        };
-
+    pub fn evolve_map(self: World, steps: usize) void {
+        _ = steps;
         for (0..self.height) |y| {
+            const iy: i32 = @intCast(y);
             for (0..self.width) |x| {
-                res.map[y * x] = self.evolve_cell(x, y);
+                const ix: i32 = @intCast(x);
+                const iw: i32 = @intCast(self.width);
+                const pos: usize = @intCast(iy * iw + ix);
+                self.alt_map[pos] = self.evolve_cell(ix, iy);
             }
         }
+
+        std.debug.print("type of {} and {}\n", .{ @TypeOf(self.map), @TypeOf(self.alt_map) });
+
+        var tmp = self.alt_map.ptr;
+        std.debug.print("type of {}\n", .{@TypeOf(tmp)});
+        //self.alt_map.ptr = self.map.ptr;
+        //self.map.ptr = tmp;
+        tmp = self.map.ptr;
+
+        //std.mem.swap([]u8, &(self.map), &(self.alt_map));
+        return;
     }
 
     pub fn evolve_cell(self: World, x: i32, y: i32) u8 {
@@ -89,7 +106,7 @@ pub const World = struct {
             const nx = x + dir[0];
             const ny = y + dir[1];
             if (self.get_at(nx, ny)) |neighbour| {
-                std.debug.print("({}, {}): <{c}>\n", .{ nx, ny, neighbour });
+                // std.debug.print("({}, {}): <{c}>\n", .{ nx, ny, neighbour });
                 if (neighbour == self.live) {
                     count += 1;
                 }
@@ -181,10 +198,11 @@ test "Evelove map" {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     var test_world = try World.init(".#.####..", 3, 3, gpa.allocator());
 
+    // const stdout_file = std.io.getStdOut().writer();
+    const stdout_file = std.io.getStdErr().writer();
+    var bw = std.io.bufferedWriter(stdout_file);
+    const stdout = bw.writer();
 
-
-    const evolved = test_world.evolve_map();
-
-    test_world.print(out: anytype)
-    
+    test_world.evolve_map();
+    test_world.print(stdout);
 }

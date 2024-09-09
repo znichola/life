@@ -11,12 +11,16 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
-    var test_world = try World.init("....#....", 3, 3, allocator);
-    test_world.print(stdout);
+    var world = try World.init(".#.####..", 3, 3, allocator);
+    world.print(stdout);
 
-    std.debug.print("got result as <{}>\n", .{test_world.count_neighbours('.', 0, 0)});
+    try stdout.print("\ngot result as <{}>\n\n", .{world.count_neighbours(0, 0)});
 
-    allocator.free(test_world.map);
+    world.evolve_map(1);
+    world.print(stdout);
+
+    allocator.free(world.map);
+    allocator.free(world.alt_map);
     try bw.flush();
 }
 
