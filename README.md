@@ -9,3 +9,9 @@ The first implementation was in c.
 ## Zig
 
 My attempt at doing it in zig, let's see how it do.
+
+### zig language resources
+
+- [error handelling](https://pedropark99.github.io/zig-book/Chapters/09-error-handling.html)
+
+- [zi cookbook](https://cookbook.ziglang.cc/15-02-string.html)

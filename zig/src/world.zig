@@ -20,6 +20,11 @@ pub const World = struct {
         return (World){ .map = m, .alt_map = alt_map, .width = width, .height = height, .allocator = allocator };
     }
 
+    pub fn free(self: *World) void {
+        self.allocator.free(self.map);
+        self.allocator.free(self.alt_map);
+    }
+
     pub fn evolve_map(self: *World, steps: usize) void {
         for (0..steps) |_| {
             for (0..self.height) |y| {
@@ -62,8 +67,6 @@ pub const World = struct {
     pub fn count_neighbours(self: World, x: i32, y: i32) i32 {
         var count: i32 = 0;
 
-        // std.debug.print("\nStarting debugg ({}, {})\n", .{ x, y });
-        // const DirectionFn = fn (self: World, x: usize, y: usize) !u8(DirectionError);
         const directions = [_][2]i32{
             .{ 0, -1 }, // North
             .{ 1, 0 }, // East
@@ -79,7 +82,6 @@ pub const World = struct {
             const nx = x + dir[0];
             const ny = y + dir[1];
             if (self.get_at(nx, ny)) |neighbour| {
-                // std.debug.print("({}, {}): <{c}>\n", .{ nx, ny, neighbour });
                 if (neighbour == self.live) {
                     count += 1;
                 }
@@ -110,7 +112,7 @@ pub const World = struct {
         //            std.debug.print("{s}\n", .{self.map[i * self.width .. i * self.width + self.width]});
         //        }
         //    } else {
-        out.print("gen: {}\nh: {}\nw: {}\n", .{ self.generation, self.height, self.width }) catch {};
+        out.print("gen: {}\t{}*{}\n", .{ self.generation, self.height, self.width }) catch {};
         for (0..self.height) |i| {
             out.print("{s}\n", .{self.map[i * self.width .. i * self.width + self.width]}) catch {};
         }
@@ -204,6 +206,6 @@ test "Evelove map" {
     var bw = std.io.bufferedWriter(stdout_file);
     const stdout = bw.writer();
 
-    test_world.evolve_map();
+    test_world.evolve_map(1);
     test_world.print(stdout);
 }
