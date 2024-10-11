@@ -14,9 +14,14 @@ pub const World = struct {
 
     const DirectionError = error{ OutOfBounds, EmptyWorld };
 
-    pub fn init(map: []const u8, height: usize, width: usize, allocator: std.mem.Allocator) !World {
+    pub fn init(map: []const u8, width: usize, height: usize, allocator: std.mem.Allocator) !World {
         const m = try allocator.dupe(u8, map);
+        errdefer allocator.free(m);
         const alt_map = try allocator.dupe(u8, map);
+        errdefer allocator.free(alt_map);
+        if (map.len < width * height) {
+            return error.BadMapDimentions;
+        }
         return (World){ .map = m, .alt_map = alt_map, .width = width, .height = height, .allocator = allocator };
     }
 
