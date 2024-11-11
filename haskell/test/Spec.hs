@@ -1,38 +1,24 @@
 -- Example.hs  --  Examples from HUnit user's guide
 --
--- For more examples, check out the tests directory.  It contains unit tests
+-- For more exampsles, check out the tests directory.  It contains unit tests
 -- for HUnit.
 
 import Test.HUnit
 
+import Lib (makeGrid, set)
 
-foo :: Int -> (Int, Int)
-foo x = (1, x)
-
-partA :: Int -> IO (Int, Int)
-partA v = return (v+2, v+3)
-
-partB :: Int -> IO Bool
-partB v = return (v > 5)
-
-test1 :: Test
-test1 = TestCase (assertEqual "for (foo 3)," (1,2) (foo 3))
-
-test2 :: Test
-test2 = TestCase (do (x,y) <- partA 3
-                     assertEqual "for the first result of partA," 5 x
-                     b <- partB y
-                     assertBool ("(partB " ++ show y ++ ") failed") b)
+t1 :: Test
+t1 = TestCase (assertEqual "spawning" [False] (makeGrid 1))
 
 tests :: Test
-tests = TestList [TestLabel "test1" test1, TestLabel "test2" test2]
-
-tests' :: Test
-tests' = test [ "test1" ~: "(foo 3)" ~: (1,2) ~=? (foo 3),
-                "test2" ~: do (x, y) <- partA 3
-                              assertEqual "for the first result of partA," 5 x
-                              partB y @? "(partB " ++ show y ++ ") failed" ]
+tests =
+  TestList
+    [ TestLabel "t1" t1,
+      "makeGrid 3" ~: [False, False, False, False] ~=? makeGrid 2,
+      "set one to true" ~: [True] ~=? set [False] 0 True,
+      "set other to true" ~: [False, True, False, False] ~=? set (makeGrid 2) 1 True,
+      "set on empty list?" ~: [] ~=? set [] 0 True
+    ]
 
 main :: IO Counts
-main = do _ <- runTestTT tests
-          runTestTT tests'
+main = runTestTT tests
