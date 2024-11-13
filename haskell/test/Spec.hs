@@ -1,9 +1,13 @@
--- Example.hs  --  Examples from HUnit user's guide
---
--- For more exampsles, check out the tests directory.  It contains unit tests
--- for HUnit.
-
-import Lib (get, getAt, makeGrid, neighbours, set, setAt)
+import Lib
+  ( evolve,
+    get,
+    getAt,
+    makeGrid,
+    neighbours,
+    nextGeneration,
+    set,
+    setAt,
+  )
 import Test.HUnit
 
 t1 :: Test
@@ -21,11 +25,21 @@ tests =
       "get one from many" ~: True ~=? get [False, True, False, False] 1,
       "get on empty list" ~: False ~=? get [] 0,
       "get last one" ~: True ~=? get [False, True, False, True] 3,
+      "get past end" ~: False ~=? get [True] 2,
+      "get negative" ~: False ~=? get [True] (-1),
+      "getAt bugged thing" ~: False ~=? getAt 1 [True] 1 (-1),
+      "getAt bugged thing 2" ~: False ~=? getAt 1 [True] (-1) 1,
       "set last one" ~: [False, False, False, True] ~=? set (makeGrid 2) 3 True,
       "get at corrd" ~: False ~=? getAt 1 [False] 0 0,
       "set at corrd" ~: [True] ~=? setAt 1 [False] 0 0 True,
       "get neighbours" ~: replicate 8 False ~=? neighbours 3 (makeGrid 3) 0 0,
-      "get neighbours 2" ~: True : replicate 7 False ~=? neighbours 3 (set (makeGrid 3) 0 True) 1 1
+      "get neighbours 2" ~: True : replicate 7 False ~=? neighbours 3 (set (makeGrid 3) 0 True) 1 1,
+      "get neighbours edge" ~: [False, False, False, False, True, False, False, False] ~=? neighbours 3 (set (makeGrid 3) 1 True) 0 0,
+      "neighbours 0" ~: [False, False, False, False, True, False, True, True] ~=? neighbours 2 [False, True, True, True] 0 0,
+      "neighbours all out of bounds" ~: replicate 8 False ~=? neighbours 1 [True] 0 0,
+      "evolve one cell" ~: True ~=? evolve 2 [False, True, True, True] 0 0,
+      "next generation" ~: replicate 4 True ~=? nextGeneration 2 [False, True, True, True],
+      "" ~: True ~=? True
     ]
 
 main :: IO Counts
