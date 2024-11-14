@@ -2,6 +2,8 @@ import Lib
   ( evolve,
     get,
     getAt,
+    getX,
+    getY,
     makeGrid,
     neighbours,
     nextGeneration,
@@ -38,7 +40,15 @@ tests =
       "neighbours 0" ~: [False, False, False, False, True, False, True, True] ~=? neighbours 2 [False, True, True, True] 0 0,
       "neighbours all out of bounds" ~: replicate 8 False ~=? neighbours 1 [True] 0 0,
       "evolve one cell" ~: True ~=? evolve 2 [False, True, True, True] 0 0,
+      "convert index to x coord" ~: 0 ~=? getX 1 0,
+      "convert index to x coord 2" ~: 0 ~=? getX 3 3,
+      "convert index to y coord" ~: 0 ~=? getY 1 0,
+      "convert index to y coord 2" ~: 1 ~=? getY 3 3,
       "next generation" ~: replicate 4 True ~=? nextGeneration 2 [False, True, True, True],
+      "under population" ~:  replicate 9 False ~=? nextGeneration 3 [False, False, False, False, True, False, False, False, True],
+      "survival" ~:  True ~=? evolve 3 [False, False, False, True, True, False, False, True, True] 1 1,
+      "overcrowding" ~:  False ~=? evolve 3 (replicate 9 True) 1 1,
+      "reproduction" ~:  True ~=? evolve 3 [False, False, False, True, False, False, False, True, True] 1 1,
       "" ~: True ~=? True
     ]
 

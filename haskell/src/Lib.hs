@@ -8,6 +8,8 @@ module Lib
     neighbours,
     evolve,
     nextGeneration,
+    getX,
+    getY,
   )
 where
 
@@ -44,14 +46,23 @@ neighbours s bs x y =
     g x' y' = getAt s bs (x + x') (y + y')
 
 evolve :: Int -> [] Bool -> Int -> Int -> Bool
-evolve s bs x y = c == 3 || c == 2
+evolve s bs x y = if c == 2 then getAt s bs x y else c == 3
   where
     c = count id (neighbours s bs x y)
 
--- nextGeneration :: Int -> []Bool -> [] Bool
--- nextGeneration s bs = go l 0
---   where
---     l = length bs
---     getX i = i mod s
---     getY
---     go len i = [True]
+getX :: Int -> Int -> Int
+getX 0 _ = 0
+getX s i = mod i s
+
+-- 0 1 2
+-- 3 4 5
+-- 6 7 8
+
+getY :: Int -> Int -> Int
+getY 0 _ = 0
+getY s i = div i s
+
+nextGeneration :: Int -> [] Bool -> [] Bool
+nextGeneration s bs = map go [0 .. (length bs - 1)]
+  where
+    go i = evolve s bs (getX s i) (getY s i)
